@@ -1,0 +1,90 @@
+import React from 'react';
+import { Message } from '../types';
+import { formatTime, cn } from '../lib/utils';
+import { Check, CheckCheck, FileIcon, Download } from 'lucide-react';
+import { motion } from 'motion/react';
+
+interface MessageBubbleProps {
+  message: Message;
+  isOwn: boolean;
+  key?: React.Key;
+}
+
+export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
+  const isImage = message.type === 'image';
+  const isFile = message.type === 'file';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      className={cn(
+        "flex w-full",
+        isOwn ? "justify-end" : "justify-start"
+      )}
+    >
+      <div
+        className={cn(
+          "max-w-[85%] md:max-w-[70%] rounded-2xl px-3 py-2 shadow-sm relative group",
+          isOwn 
+            ? "bg-emerald-500 text-white rounded-tr-none" 
+            : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none ring-1 ring-slate-100 dark:ring-slate-700/50"
+        )}
+      >
+        {isImage ? (
+          <div className="mb-1 rounded-lg overflow-hidden -mx-1 -mt-1">
+            <img 
+              src={message.content} 
+              alt="Sent image" 
+              className="max-w-full h-auto object-cover hover:scale-105 transition-transform duration-300" 
+              loading="lazy"
+            />
+          </div>
+        ) : isFile ? (
+          <div className={cn(
+            "flex items-center gap-3 p-3 rounded-xl mb-1",
+            isOwn ? "bg-emerald-600/40" : "bg-slate-100 dark:bg-slate-700"
+          )}>
+            <div className="w-10 h-10 rounded-lg bg-emerald-500/20 dark:bg-emerald-400/20 flex items-center justify-center text-emerald-500 dark:text-emerald-400">
+              <FileIcon size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate text-current">File Attachment</p>
+              <p className="text-[10px] opacity-70">Click to preview</p>
+            </div>
+            <a 
+              href={message.content} 
+              target="_blank" 
+              rel="noreferrer"
+              className="p-2 hover:bg-black/10 rounded-full transition-colors"
+            >
+              <Download size={18} />
+            </a>
+          </div>
+        ) : (
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+        )}
+
+        <div className="flex items-center justify-end gap-1.5 mt-1">
+          <span className={cn(
+            "text-[9px] font-medium",
+            isOwn ? "text-emerald-100/80" : "text-slate-400 dark:text-slate-500"
+          )}>
+            {formatTime(message.created_at)}
+          </span>
+          {isOwn && (
+            <div className="text-emerald-100/80">
+              {message.status === 'seen' ? (
+                <CheckCheck size={12} className="text-sky-300" />
+              ) : message.status === 'delivered' ? (
+                <CheckCheck size={12} />
+              ) : (
+                <Check size={12} />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
